@@ -1,6 +1,7 @@
 # 510K — Classic Card Game
 
 > I built this to digitize a card game my friends and I play at gatherings.  
+> [中文说明](README.zh-CN.md)  
 > We always play 510K, but someone forgets the rules or miscounts points.  
 > So I made a web version — play anytime, anywhere.
 
