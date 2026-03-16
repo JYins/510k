@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isRoomPlayer(roomId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/rooms/$(roomId)/players/$(request.auth.uid));
+    }
+
+    // Public room data - readable by all players in room
+    match /rooms/{roomId} {
+      allow read: if isRoomPlayer(roomId);
+      allow create: if isAuthenticated();
+      // Only cloud functions can update room state
+      allow update: if false;
+      allow delete: if isAuthenticated() && resource.data.hostId == request.auth.uid;
+    }
+
+    // Player public info within room
+    match /rooms/{roomId}/players/{playerId} {
+      allow read: if isRoomPlayer(roomId);
+      allow create: if isAuthenticated() && playerId == request.auth.uid;
+      // Only cloud functions can update player state
+      allow update: if false;
+      allow delete: if isOwner(playerId);
+    }
+
+    // Private player hands - ONLY readable by the owning player
+    // Server writes this, only playerId can read
+    match /roomPrivate/{roomId}/hands/{playerId} {
+      allow read: if isOwner(playerId);
+      // Only cloud functions can write (server-side only)
+      allow write: if false;
+    }
+
+    // Game deck and internal state - server only
+    match /roomPrivate/{roomId}/{document=**} {
+      allow read, write: if false;
+    }
+
+    // Move audit log - append only by server
+    match /rooms/{roomId}/moves/{moveId} {
+      allow read: if isRoomPlayer(roomId);
+      allow create: if false; // Server only
+      allow update, delete: if false;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner(userId);
+      allow delete: if false;
+    }
+  }
+}
