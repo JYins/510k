@@ -1,5 +1,5 @@
-import { Card, Rank } from "./types";
-import { RANK_VALUE } from "./cards";
+import { Card, Rank, Suit } from "./types";
+import { RANK_VALUE, SUIT_VALUE } from "./cards";
 
 export type PlayType =
   | "single"
@@ -16,6 +16,8 @@ export interface PlayValue {
   length: number;
   mainRank: Rank;
   mainRankValue: number;
+  /** Highest suit value among the main cards (for tie-breaking same rank) */
+  mainSuitValue: number;
   isBomb: boolean;
   isJokerBomb: boolean;
 }
@@ -55,6 +57,16 @@ function isSequenceAllowed(ranks: Rank[]): boolean {
   return ranks.every((rank) => !INVALID_SEQUENCE_RANKS.has(rank));
 }
 
+function highestSuitValue(cards: Card[], targetRank?: Rank): number {
+  let best = 0;
+  for (const c of cards) {
+    if (targetRank !== undefined && c.rank !== targetRank) continue;
+    const sv = c.suit ? SUIT_VALUE[c.suit] : 0;
+    if (sv > best) best = sv;
+  }
+  return best;
+}
+
 export function analyzePlay(cards: Card[]): PlayValue | null {
   if (cards.length === 0) {
     return null;
@@ -70,6 +82,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
       length: 2,
       mainRank: "BJ",
       mainRankValue: getRankValue("BJ"),
+      mainSuitValue: 0,
       isBomb: true,
       isJokerBomb: true
     };
@@ -88,6 +101,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
         length: 1,
         mainRank: rank,
         mainRankValue: getRankValue(rank),
+        mainSuitValue: highestSuitValue(cards, rank),
         isBomb: false,
         isJokerBomb: false
       };
@@ -98,6 +112,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
         length: 2,
         mainRank: rank,
         mainRankValue: getRankValue(rank),
+        mainSuitValue: highestSuitValue(cards, rank),
         isBomb: false,
         isJokerBomb: false
       };
@@ -108,6 +123,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
         length: 3,
         mainRank: rank,
         mainRankValue: getRankValue(rank),
+        mainSuitValue: highestSuitValue(cards, rank),
         isBomb: false,
         isJokerBomb: false
       };
@@ -118,6 +134,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
         length: 4,
         mainRank: rank,
         mainRankValue: getRankValue(rank),
+        mainSuitValue: highestSuitValue(cards, rank),
         isBomb: true,
         isJokerBomb: false
       };
@@ -131,6 +148,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
       length: 4,
       mainRank,
       mainRankValue: getRankValue(mainRank),
+      mainSuitValue: highestSuitValue(cards, mainRank),
       isBomb: false,
       isJokerBomb: false
     };
@@ -143,6 +161,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
       length: 5,
       mainRank,
       mainRankValue: getRankValue(mainRank),
+      mainSuitValue: highestSuitValue(cards, mainRank),
       isBomb: false,
       isJokerBomb: false
     };
@@ -156,6 +175,7 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
         length: total,
         mainRank: maxRank,
         mainRankValue: getRankValue(maxRank),
+        mainSuitValue: highestSuitValue(cards, maxRank),
         isBomb: false,
         isJokerBomb: false
       };
@@ -189,5 +209,12 @@ export function canBeatPlay(
   if (challenger.length !== current.length) {
     return false;
   }
-  return challenger.mainRankValue > current.mainRankValue;
+  if (challenger.mainRankValue > current.mainRankValue) {
+    return true;
+  }
+  if (challenger.mainRankValue < current.mainRankValue) {
+    return false;
+  }
+  // Same rank: compare suit (♠>♥>♣>♦)
+  return challenger.mainSuitValue > current.mainSuitValue;
 }

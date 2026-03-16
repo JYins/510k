@@ -210,13 +210,17 @@ async function updateUserScores(room: RoomState): Promise<void> {
     const p = sorted[i];
     const ref = db.collection(USERS_COLLECTION).doc(p.uid);
     const earned = p.score + (bonuses[i] ?? 0);
-    batch.update(ref, {
+    batch.set(ref, {
       totalScore: admin.firestore.FieldValue.increment(earned),
       gamesPlayed: admin.firestore.FieldValue.increment(1),
       ...(i === 0 ? { gamesWon: admin.firestore.FieldValue.increment(1) } : {}),
-    });
+    }, { merge: true });
   }
-  await batch.commit().catch(() => {});
+  try {
+    await batch.commit();
+  } catch (e) {
+    console.error("updateUserScores failed:", e);
+  }
 }
 
 function generateRoomId(): string {
@@ -694,6 +698,45 @@ export const autoSettleIfNeeded = onCall(async (request) => {
     await updateUserScores(settledRoom);
 
     return { roomId, settled: true };
+  });
+});
+
+export const leaveGame = onCall(async (request) => {
+  const uid = requireAuth(request);
+  const roomId = String(request.data?.roomId ?? "");
+  if (!roomId) {
+    throw new HttpsError("invalid-argument", "缺少 roomId。");
+  }
+
+  const roomRef = db.collection(ROOMS_COLLECTION).doc(roomId);
+
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(roomRef);
+    if (!snap.exists) {
+      throw new HttpsError("not-found", "房间不存在。");
+    }
+    const room = snap.data() as RoomState;
+
+    const player = room.players.find((p) => p.uid === uid);
+    if (!player) {
+      return { roomId, left: true };
+    }
+
+    if (room.status !== "playing") {
+      const updatedPlayers = room.players.filter((p) => p.uid !== uid);
+      if (updatedPlayers.length === 0) {
+        tx.delete(roomRef);
+      } else {
+        tx.update(roomRef, { players: updatedPlayers, updatedAt: Date.now() });
+      }
+      return { roomId, left: true };
+    }
+
+    // Game is active — settle immediately
+    const settledRoom = settleGame(room);
+    tx.set(roomRef, settledRoom, { merge: true });
+    await updateUserScores(settledRoom);
+    return { roomId, left: true, settled: true };
   });
 });
 

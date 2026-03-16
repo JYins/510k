@@ -17,6 +17,7 @@ interface UseGameActionsReturn {
   selectCards: (cardIds: string[]) => void;
   playCards: () => Promise<void>;
   pass: () => Promise<void>;
+  leaveGame: () => Promise<void>;
 }
 
 export function useGameActions({ roomId }: UseGameActionsOptions): UseGameActionsReturn {
@@ -63,6 +64,19 @@ export function useGameActions({ roomId }: UseGameActionsOptions): UseGameAction
     }
   }, [roomId]);
 
+  const leaveGame = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const fn = httpsCallable(functions, "leaveGame");
+      await fn({ roomId });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "退出失败");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [roomId]);
+
   return {
     selectedCards,
     isLoading,
@@ -72,5 +86,6 @@ export function useGameActions({ roomId }: UseGameActionsOptions): UseGameAction
     selectCards,
     playCards,
     pass,
+    leaveGame,
   };
 }

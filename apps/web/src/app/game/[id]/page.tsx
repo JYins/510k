@@ -169,7 +169,7 @@ export default function GamePage() {
   };
 
   const {
-    selectedCards, isLoading, error, toggleCard, playCards, pass,
+    selectedCards, isLoading, error, toggleCard, playCards, pass, leaveGame,
   } = useGameActions({ roomId });
 
   const selectedCardObjects = useMemo(
@@ -194,10 +194,15 @@ export default function GamePage() {
     return undefined;
   }, [selectedCardObjects]);
 
-  const handleExitConfirm = useCallback(() => {
+  const handleExitConfirm = useCallback(async () => {
     setShowExitDialog(false);
+    try {
+      await leaveGame();
+    } catch {
+      // best-effort
+    }
     router.push("/");
-  }, [router]);
+  }, [router, leaveGame]);
 
   if (loading) {
     return (
