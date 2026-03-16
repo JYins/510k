@@ -2,7 +2,8 @@ node_modules/
 .next/
 .turbo/
 dist/
-lib/
+/functions/lib/
+/shared/dist/
 .firebase/
 .env
 .env.local
