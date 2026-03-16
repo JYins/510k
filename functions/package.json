@@ -1,0 +1,22 @@
+{
+  "name": "510k-functions",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "echo \"no lint configured\"",
+    "serve": "npm --prefix ../shared run build && npm run build && firebase emulators:start --only functions,firestore,auth"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.5.0",
+    "firebase-functions": "^5.1.0",
+    "graphql": "^16.9.0",
+    "@510k/shared": "file:../shared"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
