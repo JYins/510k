@@ -1,0 +1,16 @@
+{
+  "name": "510k-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "functions",
+    "shared"
+  ],
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "build:web": "npm --prefix apps/web run build",
+    "lint:web": "npm --prefix apps/web run lint",
+    "build:shared": "npm --prefix shared run build",
+    "build:functions": "npm --prefix functions run build"
+  }
+}
