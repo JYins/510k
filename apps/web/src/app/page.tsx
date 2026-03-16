@@ -8,12 +8,24 @@ import { ScoreBoard } from "@/components/home/ScoreBoard";
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, userProfile, signOut } = useAuth();
+  const { user, userProfile, loading, signOut } = useAuth();
   const [maxPlayers, setMaxPlayers] = useState<2 | 3 | 4>(4);
   const [roomIdInput, setRoomIdInput] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [activeTab, setActiveTab] = useState<"create" | "join">("create");
   const [errorMsg, setErrorMsg] = useState("");
+
+  if (loading) {
+    return (
+      <div className="min-h-[100dvh] bg-black flex items-center justify-center">
+        <motion.div
+          className="w-8 h-8 border-2 border-white/20 border-t-white/70 rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+    );
+  }
 
   const handleCreateRoom = async () => {
     if (!user) {
@@ -55,26 +67,31 @@ export default function HomePage() {
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-white/60 font-medium">510K</span>
         </div>
-        <motion.button
-          className="w-10 h-10 rounded-full flex items-center justify-center bg-ios-gray-500/60 backdrop-blur-ios"
-          whileTap={{ scale: 0.92 }}
-          onClick={() => {
-            if (user) {
-              signOut();
-            } else {
-              router.push("/auth");
-            }
-          }}
-        >
-          {user && userProfile ? (
-            <span className="text-[22px] leading-none select-none">{userProfile.avatar}</span>
-          ) : (
+        {user ? (
+          <motion.button
+            className="h-10 rounded-full flex items-center gap-2 bg-ios-gray-500/60 backdrop-blur-ios px-1.5 pr-3"
+            whileTap={{ scale: 0.95 }}
+            onClick={() => signOut()}
+          >
+            <span className="w-7 h-7 rounded-full bg-ios-gray-400 flex items-center justify-center text-[16px] leading-none select-none">
+              {userProfile?.avatar || "👤"}
+            </span>
+            <span className="text-[13px] text-white/80 font-medium max-w-[80px] truncate">
+              {userProfile?.displayName || "用户"}
+            </span>
+          </motion.button>
+        ) : (
+          <motion.button
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-ios-gray-500/60 backdrop-blur-ios"
+            whileTap={{ scale: 0.92 }}
+            onClick={() => router.push("/auth")}
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-          )}
-        </motion.button>
+          </motion.button>
+        )}
       </div>
 
       {/* Background Effects */}

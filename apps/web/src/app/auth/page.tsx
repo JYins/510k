@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,7 +15,7 @@ const SPRING = { type: "spring" as const, stiffness: 350, damping: 28 };
 
 export default function AuthPage() {
   const router = useRouter();
-  const { signUp, signIn, signInWithGoogle } = useAuth();
+  const { user, loading: authLoading, signUp, signIn, signInWithGoogle } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +24,12 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace("/");
+    }
+  }, [authLoading, user, router]);
 
   const handleSubmit = async () => {
     setError("");
@@ -79,6 +85,18 @@ export default function AuthPage() {
       setGoogleLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-[100dvh] bg-black flex items-center justify-center">
+        <motion.div
+          className="w-8 h-8 border-2 border-white/20 border-t-white/70 rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black flex flex-col overflow-hidden">
