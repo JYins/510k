@@ -15,7 +15,7 @@ import {
   SUIT_VALUE
 } from "@510k/shared";
 
-setGlobalOptions({ region: "us-central1" });
+setGlobalOptions({ region: "us-central1", invoker: "public" });
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
