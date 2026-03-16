@@ -219,6 +219,15 @@ async function updateUserScores(room: RoomState): Promise<void> {
   await batch.commit().catch(() => {});
 }
 
+function generateRoomId(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
 export const createRoom = onCall(async (request) => {
   const uid = requireAuth(request);
   const maxPlayers = Number(request.data?.maxPlayers ?? 2);
@@ -226,8 +235,21 @@ export const createRoom = onCall(async (request) => {
     throw new HttpsError("invalid-argument", "maxPlayers 需要是 2-4。");
   }
 
+  let roomId = "";
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const candidate = generateRoomId();
+    const existing = await db.collection(ROOMS_COLLECTION).doc(candidate).get();
+    if (!existing.exists) {
+      roomId = candidate;
+      break;
+    }
+  }
+  if (!roomId) {
+    throw new HttpsError("unavailable", "无法生成房间号，请重试。");
+  }
+
   const now = Date.now();
-  const roomRef = db.collection(ROOMS_COLLECTION).doc();
+  const roomRef = db.collection(ROOMS_COLLECTION).doc(roomId);
   const displayName = await getUserDisplayName(uid) || request.auth?.token?.name;
   const host: Player = {
     uid,
@@ -237,7 +259,7 @@ export const createRoom = onCall(async (request) => {
   };
 
   const room: RoomState = {
-    roomId: roomRef.id,
+    roomId,
     status: "lobby",
     maxPlayers,
     createdAt: now,
@@ -257,7 +279,7 @@ export const createRoom = onCall(async (request) => {
 
   await roomRef.set(room);
 
-  return { roomId: roomRef.id };
+  return { roomId };
 });
 
 export const joinRoom = onCall(async (request) => {

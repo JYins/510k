@@ -175,7 +175,7 @@ export default function RoomPage() {
               房间号
             </p>
             <div className="flex items-center justify-center gap-3">
-              <span className="text-[22px] font-bold text-white tracking-[0.08em] font-mono break-all text-center">
+              <span className="text-[36px] font-bold text-white tracking-[0.15em] font-mono">
                 {roomId}
               </span>
               <motion.button
