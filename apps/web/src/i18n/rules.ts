@@ -76,10 +76,10 @@ export const rulesContent: Record<Locale, string> = {
 
 ## 10. 牌堆空后与终局条件
 
-不再补牌，玩家只打手中剩余牌。满足以下任一条件时终局结算：
+不再补牌，玩家只打手中剩余牌。终局结算**仅**在牌库发空后触发，满足以下任一条件时结算：
 
-- 牌库发空后，若所有人都 Pass，则终局结算
-- 任一玩家手牌打光时，立即终局结算
+- 所有人都 Pass
+- 有一方手牌打光
 
 ## 11. 终局结算
 
@@ -165,10 +165,10 @@ If trick total = 0 and deck has cards, refill clockwise from winner until each h
 
 ## 10. Empty Deck and End Conditions
 
-No more refills. Players use remaining cards. Game ends when either:
+No more refills. Players use remaining cards. End-game settlement triggers **only** after the deck is empty, when either:
 
-- Deck is empty and everyone has passed
-- Any player runs out of cards
+- Everyone has passed
+- One player runs out of cards
 
 ## 11. End Game
 

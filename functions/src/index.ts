@@ -428,7 +428,7 @@ export const playCards = onCall(async (request) => {
     }
 
     if (room.trick.lastPlay) {
-      const isLeaderBack = room.trick.lastPlay.seat === player.seat;
+      const isLeaderBack = Number(room.trick.lastPlay.seat) === Number(player.seat);
       if (!isLeaderBack) {
         const lastValue = analyzePlay(room.trick.lastPlay.cards);
         if (!lastValue) {
@@ -463,7 +463,8 @@ export const playCards = onCall(async (request) => {
     const anyHandEmpty = updatedRoom.players.some(
       (p) => (updatedRoom.hands[p.uid] ?? []).length === 0
     );
-    if (anyHandEmpty) {
+    const deckEmpty = updatedRoom.deck.length === 0;
+    if (anyHandEmpty && deckEmpty) {
       updatedRoom = settleGame(updatedRoom);
     }
 
