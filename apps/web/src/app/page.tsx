@@ -55,7 +55,7 @@ export default function HomePage() {
       return;
     }
     if (roomIdInput.trim()) {
-      router.push(`/room/${roomIdInput.trim().toUpperCase()}`);
+      router.push(`/room/${roomIdInput.trim()}`);
     }
   };
 
@@ -260,9 +260,9 @@ export default function HomePage() {
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="ABC123"
+                      placeholder="粘贴房间号"
                       value={roomIdInput}
-                      onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
+                      onChange={(e) => setRoomIdInput(e.target.value)}
                       className="w-full h-16 bg-ios-gray-600/70 rounded-2xl text-white text-center text-[28px] font-bold tracking-[0.15em] placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-ios-blue/50 border border-white/5 transition-all"
                       maxLength={20}
                     />
