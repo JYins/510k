@@ -20,13 +20,13 @@ export async function startGame(roomId: string) {
 }
 
 export async function playCards(roomId: string, cardIds: string[]) {
-  const callable = httpsCallable(functions, "play");
+  const callable = httpsCallable(functions, "playCards");
   const result = await callable({ roomId, cardIds });
   return result.data as { roomId: string };
 }
 
 export async function passTurn(roomId: string) {
-  const callable = httpsCallable(functions, "pass");
+  const callable = httpsCallable(functions, "passTurn");
   const result = await callable({ roomId });
   return result.data as { roomId: string };
 }

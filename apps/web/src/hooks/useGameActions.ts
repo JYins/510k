@@ -40,7 +40,7 @@ export function useGameActions({ roomId }: UseGameActionsOptions): UseGameAction
     setIsLoading(true);
     setError(null);
     try {
-      const fn = httpsCallable(functions, "play");
+      const fn = httpsCallable(functions, "playCards");
       await fn({ roomId, cardIds: selectedCards });
       setSelectedCards([]);
     } catch (err: unknown) {
@@ -54,7 +54,7 @@ export function useGameActions({ roomId }: UseGameActionsOptions): UseGameAction
     setIsLoading(true);
     setError(null);
     try {
-      const fn = httpsCallable(functions, "pass");
+      const fn = httpsCallable(functions, "passTurn");
       await fn({ roomId });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "操作失败");

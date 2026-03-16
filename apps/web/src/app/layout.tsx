@@ -33,7 +33,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className="antialiased bg-black text-white overflow-hidden">
+      <body className="antialiased bg-black text-white">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

@@ -13,6 +13,7 @@ export default function HomePage() {
   const [roomIdInput, setRoomIdInput] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [activeTab, setActiveTab] = useState<"create" | "join">("create");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleCreateRoom = async () => {
     if (!user) {
@@ -20,6 +21,7 @@ export default function HomePage() {
       return;
     }
     setIsCreating(true);
+    setErrorMsg("");
     try {
       const { httpsCallable } = await import("firebase/functions");
       const { functions } = await import("@/lib/firebase");
@@ -27,8 +29,9 @@ export default function HomePage() {
       const result = await createRoomFn({ maxPlayers });
       const data = result.data as { roomId: string };
       router.push(`/room/${data.roomId}`);
-    } catch (error) {
-      console.error("Failed to create room:", error);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "创建房间失败";
+      setErrorMsg(msg);
     } finally {
       setIsCreating(false);
     }
@@ -45,9 +48,9 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col overflow-hidden">
+    <div className="min-h-[100dvh] bg-black flex flex-col overflow-y-auto">
       {/* Top bar with user button */}
-      <div className="h-12 w-full flex items-center justify-between px-5 pt-2 relative z-20">
+      <div className="h-12 w-full flex items-center justify-between px-5 pt-2 relative z-20 shrink-0">
         <div className="w-10" />
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-white/60 font-medium">510K</span>
@@ -82,7 +85,7 @@ export default function HomePage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col max-w-md mx-auto w-full px-6 relative z-10">
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full px-6 relative z-10 pb-2">
         {/* Header with Large Title */}
         <motion.div
           className="pt-4 pb-5 text-center"
@@ -218,6 +221,10 @@ export default function HomePage() {
                     <span>创建房间</span>
                   )}
                 </motion.button>
+
+                {errorMsg && (
+                  <p className="text-[13px] text-red-400 text-center mt-2">{errorMsg}</p>
+                )}
               </motion.div>
             ) : (
               <motion.div
