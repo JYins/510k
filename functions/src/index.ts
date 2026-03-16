@@ -15,7 +15,7 @@ import {
   SUIT_VALUE
 } from "@510k/shared";
 
-setGlobalOptions({ region: "asia-east1" });
+setGlobalOptions({ region: "us-central1" });
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -366,7 +366,7 @@ export const startGame = onCall(async (request) => {
   });
 });
 
-export const play = onCall(async (request) => {
+export const playCards = onCall(async (request) => {
   const uid = requireAuth(request);
   const roomId = String(request.data?.roomId ?? "");
   const cardIds = request.data?.cardIds as string[] | undefined;
@@ -446,7 +446,7 @@ export const play = onCall(async (request) => {
   });
 });
 
-export const pass = onCall(async (request) => {
+export const passTurn = onCall(async (request) => {
   const uid = requireAuth(request);
   const roomId = String(request.data?.roomId ?? "");
   if (!roomId) {
