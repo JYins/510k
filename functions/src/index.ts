@@ -433,11 +433,13 @@ export const playCards = onCall(async (request) => {
       }
     }
 
+    const existingPlays = room.trick.plays ?? [];
     const nextTrick = {
       ...room.trick,
       lastPlay: { seat: player.seat, cards: removed },
       passes: 0,
-      pile: [...room.trick.pile, ...removed]
+      pile: [...room.trick.pile, ...removed],
+      plays: [...existingPlays, { seat: player.seat, cards: removed, type: "play" as const }]
     };
 
     let updatedRoom: RoomState = {
@@ -499,11 +501,13 @@ export const passTurn = onCall(async (request) => {
     }
 
     const nextPasses = room.trick.passes + 1;
+    const existingPlays = room.trick.plays ?? [];
     let nextRoom: RoomState = {
       ...room,
       trick: {
         ...room.trick,
-        passes: nextPasses
+        passes: nextPasses,
+        plays: [...existingPlays, { seat: player.seat, cards: [], type: "pass" as const }]
       },
       currentTurnSeat: nextSeat(player.seat, room.players.length),
       updatedAt: Date.now()
@@ -518,7 +522,16 @@ export const passTurn = onCall(async (request) => {
 
       let nextHands = nextRoom.hands;
       let nextDeck = nextRoom.deck;
-      if (trickPoints === 0 && nextDeck.length > 0) {
+
+      // Record trick result for UI
+      const trickResult = {
+        winnerSeat,
+        points: trickPoints,
+        pile: room.trick.pile,
+        timestamp: Date.now()
+      };
+
+      if (nextDeck.length > 0) {
         const refill = refillHandsIfNeeded(
           nextHands,
           nextDeck,
@@ -541,7 +554,8 @@ export const passTurn = onCall(async (request) => {
           passes: 0,
           pile: []
         },
-        currentTurnSeat: winnerSeat
+        currentTurnSeat: winnerSeat,
+        lastTrickResult: trickResult
       };
     }
 

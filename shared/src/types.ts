@@ -31,6 +31,12 @@ export interface Player {
   score: number;
 }
 
+export interface TrickPlay {
+  seat: number;
+  cards: Card[];
+  type: "play" | "pass";
+}
+
 export interface TrickState {
   leaderSeat: number;
   lastPlay?: {
@@ -39,6 +45,14 @@ export interface TrickState {
   } | null;
   passes: number;
   pile: Card[];
+  plays?: TrickPlay[];
+}
+
+export interface TrickResult {
+  winnerSeat: number;
+  points: number;
+  pile: Card[];
+  timestamp: number;
 }
 
 export interface RoomState {
@@ -53,4 +67,5 @@ export interface RoomState {
   deck: Card[];
   hands: Record<string, Card[]>;
   discards: Card[];
+  lastTrickResult?: TrickResult;
 }
