@@ -60,6 +60,7 @@ export const rulesContent: Record<Locale, string> = {
 
 - **先手**：可出任意合法牌型，不能 Pass
 - **跟牌**：只能出牌压过当前最大牌，或 Pass
+- **回到先手**：当除先手外所有人都 Pass，轮回到先手时，先手可出任意牌型（不必跟上一手），或 Pass 结束本墩
 
 ## 8. 压制规则
 
@@ -148,6 +149,7 @@ Each player gets 5 cards. Remaining cards form the deck. Hands change during pla
 
 - **Lead**: May play any valid type; cannot pass
 - **Follow**: Must play higher than current best, or pass
+- **Back to leader**: When everyone except the leader has passed and it's the leader's turn again, the leader may play any valid type (no need to follow the previous play) or pass to end the trick
 
 ## 8. Beating Rules
 

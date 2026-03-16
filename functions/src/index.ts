@@ -428,12 +428,15 @@ export const playCards = onCall(async (request) => {
     }
 
     if (room.trick.lastPlay) {
-      const lastValue = analyzePlay(room.trick.lastPlay.cards);
-      if (!lastValue) {
-        throw new HttpsError("failed-precondition", "上一手牌型异常。");
-      }
-      if (!canBeatPlay(playValue, lastValue, removed, room.trick.lastPlay.cards)) {
-        throw new HttpsError("failed-precondition", "你的牌不能压过上一手。");
+      const isLeaderBack = room.trick.lastPlay.seat === player.seat;
+      if (!isLeaderBack) {
+        const lastValue = analyzePlay(room.trick.lastPlay.cards);
+        if (!lastValue) {
+          throw new HttpsError("failed-precondition", "上一手牌型异常。");
+        }
+        if (!canBeatPlay(playValue, lastValue, removed, room.trick.lastPlay.cards)) {
+          throw new HttpsError("failed-precondition", "你的牌不能压过上一手。");
+        }
       }
     }
 
