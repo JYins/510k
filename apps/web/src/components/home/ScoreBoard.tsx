@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface LeaderEntry {
   uid: string;
@@ -13,6 +14,7 @@ interface LeaderEntry {
 }
 
 export function ScoreBoard() {
+  const { t } = useLocale();
   const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +55,7 @@ export function ScoreBoard() {
   return (
     <div className="bg-ios-gray-500/40 backdrop-blur-ios rounded-2xl p-5 border border-white/5 shadow-ios">
       <h3 className="text-[15px] font-semibold text-white mb-3">
-        排行榜
+        {t("leaderboard")}
       </h3>
 
       {loading ? (
@@ -66,7 +68,7 @@ export function ScoreBoard() {
         </div>
       ) : leaders.length === 0 ? (
         <p className="text-[13px] text-white/40 text-center py-4">
-          暂无数据，快来成为第一名
+          {t("noData")}
         </p>
       ) : (
         <div className="space-y-2">
@@ -87,7 +89,7 @@ export function ScoreBoard() {
                   {entry.displayName}
                 </span>
                 <span className="text-[11px] text-white/40">
-                  {entry.gamesWon}胜 / {entry.gamesPlayed}局
+                  {entry.gamesWon}{t("wins")} / {entry.gamesPlayed}{t("games")}
                 </span>
               </div>
               <span className="text-[15px] font-semibold text-white tabular-nums">

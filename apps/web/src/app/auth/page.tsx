@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
 const AVATARS = [
   "😎", "🤠", "🧑‍💻", "👨‍🎤", "🧑‍🚀", "🦊",
@@ -16,6 +18,7 @@ const SPRING = { type: "spring" as const, stiffness: 350, damping: 28 };
 export default function AuthPage() {
   const router = useRouter();
   const { user, loading: authLoading, signUp, signIn, signInWithGoogle } = useAuth();
+  const { t } = useLocale();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,15 +37,15 @@ export default function AuthPage() {
   const handleSubmit = async () => {
     setError("");
     if (!email.trim() || !password.trim()) {
-      setError("请填写邮箱和密码");
+      setError(t("fillEmailPassword"));
       return;
     }
     if (mode === "register" && !displayName.trim()) {
-      setError("请填写用户名");
+      setError(t("fillUsername"));
       return;
     }
     if (password.length < 6) {
-      setError("密码至少6位");
+      setError(t("passwordMinLength"));
       return;
     }
 
@@ -55,11 +58,11 @@ export default function AuthPage() {
       }
       router.push("/");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "操作失败";
+      const msg = err instanceof Error ? err.message : t("operationFailed");
       if (msg.includes("email-already-in-use")) {
-        setError("该邮箱已注册");
+        setError(t("emailAlreadyInUse"));
       } else if (msg.includes("user-not-found") || msg.includes("wrong-password") || msg.includes("invalid-credential")) {
-        setError("邮箱或密码错误");
+        setError(t("wrongCredentials"));
       } else {
         setError(msg);
       }
@@ -75,9 +78,9 @@ export default function AuthPage() {
       await signInWithGoogle();
       router.push("/");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Google 登录失败";
+      const msg = err instanceof Error ? err.message : t("googleSignInFailed");
       if (msg.includes("popup-closed-by-user")) {
-        setError("登录取消");
+        setError(t("loginCancelled"));
       } else {
         setError(msg);
       }
@@ -108,13 +111,16 @@ export default function AuthPage() {
 
       <div className="flex-1 flex flex-col max-w-md mx-auto w-full px-6 relative z-10 pt-16">
         {/* Back button */}
-        <motion.button
-          className="absolute top-4 left-6 text-white/60 text-[15px] font-medium"
-          whileTap={{ scale: 0.95 }}
-          onClick={() => router.push("/")}
-        >
-          ← 返回
-        </motion.button>
+        <div className="absolute top-4 left-6 right-6 flex items-center justify-between">
+          <motion.button
+            className="text-white/60 text-[15px] font-medium"
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push("/")}
+          >
+            ← {t("back")}
+          </motion.button>
+          <LanguageToggle />
+        </div>
 
         {/* Header */}
         <motion.div
@@ -124,10 +130,10 @@ export default function AuthPage() {
           transition={SPRING}
         >
           <h1 className="text-[28px] font-bold text-white">
-            {mode === "login" ? "欢迎回来" : "加入 510K"}
+            {mode === "login" ? t("welcomeBack") : t("join510k")}
           </h1>
           <p className="text-[15px] text-white/50 mt-1">
-            {mode === "login" ? "登录你的账号" : "创建新账号开始游戏"}
+            {mode === "login" ? t("loginDesc") : t("registerDesc")}
           </p>
         </motion.div>
 
@@ -151,7 +157,7 @@ export default function AuthPage() {
               }`}
               onClick={() => { setMode("login"); setError(""); }}
             >
-              登录
+              {t("login")}
             </button>
             <button
               className={`flex-1 py-2.5 text-[15px] font-semibold rounded-lg relative z-10 transition-colors ${
@@ -159,7 +165,7 @@ export default function AuthPage() {
               }`}
               onClick={() => { setMode("register"); setError(""); }}
             >
-              注册
+              {t("register")}
             </button>
           </div>
         </motion.div>
@@ -182,12 +188,12 @@ export default function AuthPage() {
               >
                 {/* Display Name */}
                 <div>
-                  <label className="text-[13px] text-white/50 mb-1.5 block">用户名</label>
+                  <label className="text-[13px] text-white/50 mb-1.5 block">{t("username")}</label>
                   <input
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="你的游戏昵称"
+                    placeholder={t("usernamePlaceholder")}
                     maxLength={12}
                     className="w-full h-12 bg-ios-gray-500/40 rounded-xl text-white text-[15px] px-4 placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-ios-blue/50 border border-white/5"
                   />
@@ -195,7 +201,7 @@ export default function AuthPage() {
 
                 {/* Avatar Selection */}
                 <div>
-                  <label className="text-[13px] text-white/50 mb-2 block">选择头像</label>
+                  <label className="text-[13px] text-white/50 mb-2 block">{t("selectAvatar")}</label>
                   <div className="grid grid-cols-6 gap-2">
                     {AVATARS.map((a) => (
                       <motion.button
@@ -219,7 +225,7 @@ export default function AuthPage() {
 
           {/* Email */}
           <div>
-            <label className="text-[13px] text-white/50 mb-1.5 block">邮箱</label>
+            <label className="text-[13px] text-white/50 mb-1.5 block">{t("email")}</label>
             <input
               type="email"
               value={email}
@@ -231,12 +237,12 @@ export default function AuthPage() {
 
           {/* Password */}
           <div>
-            <label className="text-[13px] text-white/50 mb-1.5 block">密码</label>
+            <label className="text-[13px] text-white/50 mb-1.5 block">{t("password")}</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="至少6位"
+              placeholder={t("passwordPlaceholder")}
               className="w-full h-12 bg-ios-gray-500/40 rounded-xl text-white text-[15px] px-4 placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-ios-blue/50 border border-white/5"
             />
           </div>
@@ -269,14 +275,14 @@ export default function AuthPage() {
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
             ) : (
-              <span>{mode === "login" ? "登录" : "注册"}</span>
+              <span>{mode === "login" ? t("login") : t("register")}</span>
             )}
           </motion.button>
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-2">
             <div className="flex-1 h-px bg-white/10" />
-            <span className="text-[13px] text-white/30">或</span>
+            <span className="text-[13px] text-white/30">{t("or")}</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
 
@@ -301,7 +307,7 @@ export default function AuthPage() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-                <span>使用 Google 账号登录</span>
+                <span>{t("signInWithGoogle")}</span>
               </>
             )}
           </motion.button>

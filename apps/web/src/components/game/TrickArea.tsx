@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayingCard } from "@/components/ui/PlayingCard";
 import { Card } from "@/types/game";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface TrickPlay {
   seat: number;
@@ -31,6 +32,7 @@ export function TrickArea({
   trickResult,
   playerNames,
 }: TrickAreaProps) {
+  const { t } = useLocale();
   return (
     <div className="flex flex-col items-center justify-center w-full gap-3">
       {/* Deck indicator */}
@@ -52,7 +54,7 @@ export function TrickArea({
           )}
         </div>
         <span className="text-[12px] text-white/40">
-          {deckCount > 0 ? `剩余 ${deckCount} 张` : "牌堆已空"}
+          {deckCount > 0 ? t("deckRemaining", deckCount) : t("deckEmpty")}
         </span>
       </div>
 
@@ -66,13 +68,13 @@ export function TrickArea({
             exit={{ opacity: 0, scale: 0.9 }}
             transition={SPRING}
           >
-            <p className="text-[13px] text-white/50">本墩结束</p>
+            <p className="text-[13px] text-white/50">{t("trickEnd")}</p>
             <p className="text-[20px] font-bold text-white mt-1">
-              {playerNames[trickResult.winnerSeat] ?? `座位${trickResult.winnerSeat + 1}`} 赢得本墩
+              {t("wonTrick", playerNames[trickResult.winnerSeat] ?? `#${trickResult.winnerSeat + 1}`)}
             </p>
             {trickResult.points > 0 && (
               <p className="text-[16px] text-ios-green font-semibold mt-1">
-                +{trickResult.points} 分
+                +{trickResult.points}
               </p>
             )}
           </motion.div>
@@ -83,7 +85,7 @@ export function TrickArea({
       <div className="w-full space-y-2 max-h-[200px] overflow-y-auto px-2">
         {plays.length === 0 && (
           <div className="flex items-center justify-center py-6">
-            <span className="text-[13px] text-white/20">等待出牌...</span>
+            <span className="text-[13px] text-white/20">...</span>
           </div>
         )}
 
@@ -104,7 +106,7 @@ export function TrickArea({
               </span>
 
               {play.type === "pass" ? (
-                <span className="text-[13px] text-white/25 italic">跳过</span>
+                <span className="text-[13px] text-white/25 italic">{t("pass")}</span>
               ) : (
                 <div className="flex items-center gap-[3px] flex-wrap">
                   {play.cards.map((card, j) => (

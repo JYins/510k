@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface ActionBarProps {
   onPlay: () => void;
@@ -26,6 +27,7 @@ export function ActionBar({
   isLoading = false,
   isMyTurn,
 }: ActionBarProps) {
+  const { t } = useLocale();
   if (!isMyTurn) {
     return (
       <motion.div
@@ -34,7 +36,7 @@ export function ActionBar({
         animate={{ opacity: 1 }}
       >
         <span className="text-[14px] text-white/30 font-medium">
-          等待其他玩家...
+          {t("waitingOthers")}
         </span>
       </motion.div>
     );
@@ -72,7 +74,7 @@ export function ActionBar({
         disabled={!canPass || isLoading}
         whileTap={canPass ? { scale: 0.96 } : undefined}
       >
-        跳过
+        {t("pass")}
       </motion.button>
 
       {/* Sort / utility button */}

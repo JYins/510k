@@ -1,86 +1,86 @@
-# 510K - 经典扑克牌游戏
+# 510K — Classic Card Game
 
-> 我就是单纯的想把我们几个老友的私下小游戏电子化。
-> 每次聚会都玩 510K，但总有人记不住规则，还老是算错分。
-> 所以干脆做个网页版，随时随地开一局。
+> I built this to digitize a card game my friends and I play at gatherings.  
+> We always play 510K, but someone forgets the rules or miscounts points.  
+> So I made a web version — play anytime, anywhere.
 
-## 游戏规则
+## About the Game
 
-**510K** 是一个 2-4 人的扑克牌游戏，使用一副 54 张标准扑克（含大小王）。
+**510K** is a 2–4 player card game using a standard 54-card deck (including jokers).
 
-### 核心玩法
+### Core Rules
 
-1. 每人发 5 张手牌
-2. 持最小牌者先出
-3. 其他人顺时针轮流出牌或跳过
-4. 所有人 Pass 后，最大牌的人赢得这一墩
-5. 零分墩补牌到 5 张，牌堆空后打完收工
+1. Each player is dealt 5 cards
+2. The player with the smallest card leads first
+3. Others take turns clockwise: play or pass
+4. When everyone passes, the highest play wins the trick
+5. Zero-point tricks trigger a refill to 5 cards; when the deck is empty, the game ends
 
-### 分牌规则
+### Point Cards
 
-| 牌 | 分值 |
-|----|------|
-| 5  | 5 分 |
-| 10 | 10 分 |
-| K  | 10 分 |
+| Card | Points |
+|------|--------|
+| 5    | 5      |
+| 10   | 10     |
+| K    | 10     |
 
-### 牌面大小
+### Card Ranking
 
-`4 < 5 < 6 < 7 < 8 < 9 < 10 < J < Q < K < A < 2 < 3 < 小王 < 大王`
+`4 < 5 < 6 < 7 < 8 < 9 < 10 < J < Q < K < A < 2 < 3 < Small Joker < Big Joker`
 
-花色（同点数时比较）：黑桃 > 红桃 > 梅花 > 方块
+Suits (for tie-breaking): ♠ Spades > ♥ Hearts > ♣ Clubs > ♦ Diamonds
 
-### 允许的牌型
+### Valid Play Types
 
-单张 / 对子 / 三张 / 三带一 / 三带二 / 顺子(5+) / 炸弹(四张同) / 王炸
+Single / Pair / Triple / Triple+Single / Triple+Pair / Straight (5+) / Bomb (four of a kind) / Joker Bomb
 
-## 技术栈
+## Tech Stack
 
-- **前端**: Next.js 14 + Tailwind CSS + Framer Motion
-- **后端**: Firebase Cloud Functions (v2)
-- **数据库**: Cloud Firestore (实时同步)
-- **认证**: Firebase Auth (邮箱/密码)
-- **部署**: Vercel (前端) + Firebase (后端)
+- **Frontend**: Next.js 14, Tailwind CSS, Framer Motion
+- **Backend**: Firebase Cloud Functions (v2)
+- **Database**: Cloud Firestore (real-time sync)
+- **Auth**: Firebase Auth (Email/Password, Google Sign-In)
+- **Deployment**: Vercel (frontend) + Firebase (backend)
 
-## 项目结构
+## Project Structure
 
 ```
 510k/
-├── apps/web/          # Next.js 前端
-├── functions/         # Firebase Cloud Functions
-├── shared/            # 共享游戏逻辑（牌型分析等）
-├── firebase.json      # Firebase 配置
-└── package.json       # Monorepo root
+├── apps/web/          # Next.js frontend
+├── functions/        # Firebase Cloud Functions
+├── shared/           # Shared game logic (hand analysis, etc.)
+├── firebase.json     # Firebase config
+└── package.json      # Monorepo root
 ```
 
-## 本地开发
+## Local Development
 
 ```bash
-# 安装依赖
+# Install dependencies
 npm install
 
-# 构建共享模块
+# Build shared module
 npm run build:shared
 
-# 启动前端开发服务器
+# Start frontend dev server
 npm run dev:web
 
-# 构建 Cloud Functions
+# Build Cloud Functions
 npm run build:functions
 ```
 
-## 部署
+## Deployment
 
-前端部署到 Vercel，后端部署到 Firebase：
+Frontend deploys to Vercel; backend to Firebase:
 
 ```bash
-# 部署 Cloud Functions
+# Deploy Cloud Functions
 firebase deploy --only functions
 
-# 部署 Firestore 规则
+# Deploy Firestore rules
 firebase deploy --only firestore:rules
 ```
 
 ---
 
-此游戏致敬 yp 小姐，不过输了还是要大冒险。
+*Dedicated to yp — but losing still means you have to do a dare.*

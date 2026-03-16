@@ -6,6 +6,8 @@ import { useRouter, useParams } from "next/navigation";
 import { Copy, Check, Share2, LogOut, UserPlus } from "lucide-react";
 import { useRoom } from "@/hooks/useRoom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocale } from "@/contexts/LocaleContext";
+import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
 const AVATAR_COLORS = [
   "from-ios-red to-ios-pink",
@@ -21,7 +23,8 @@ export default function RoomPage() {
   const params = useParams();
   const roomId = params.id as string;
   const router = useRouter();
-  const { user, userProfile } = useAuth();
+  const { user } = useAuth();
+  const { t } = useLocale();
   const { room, isLoading, joinRoom, startGame } = useRoom({ roomId });
 
   const [copied, setCopied] = useState(false);
@@ -48,7 +51,7 @@ export default function RoomPage() {
 
     hasJoined.current = true;
     joinRoom().catch((err: unknown) => {
-      const msg = err instanceof Error ? err.message : "加入房间失败";
+      const msg = err instanceof Error ? err.message : t("joinRoomFailed");
       setJoinError(msg);
     });
   }, [user, room, joinRoom]);
@@ -85,8 +88,8 @@ export default function RoomPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "加入 510K 游戏",
-          text: `来和我一起打 510K！房间号: ${roomId}`,
+          title: t("shareTitle"),
+          text: t("shareText", roomId),
           url: window.location.href,
         });
       } catch {
@@ -123,12 +126,12 @@ export default function RoomPage() {
   if (!room) {
     return (
       <div className="min-h-[100dvh] bg-black flex flex-col items-center justify-center gap-4">
-        <p className="text-white/50 text-[17px]">房间不存在</p>
+        <p className="text-white/50 text-[17px]">{t("roomNotFound")}</p>
         <button
           className="text-ios-blue text-[15px]"
           onClick={() => router.push("/")}
         >
-          返回首页
+          {t("backHome")}
         </button>
       </div>
     );
@@ -141,13 +144,16 @@ export default function RoomPage() {
     <div className="min-h-[100dvh] bg-black flex flex-col">
       {/* Top Bar */}
       <div className="h-12 w-full flex items-center justify-between px-6 pt-2 shrink-0">
-        <button
-          onClick={() => router.push("/")}
-          className="w-8 h-8 rounded-full bg-ios-gray-500/50 flex items-center justify-center text-white/70"
-        >
-          <span className="text-lg">←</span>
-        </button>
-        <span className="text-[15px] font-semibold text-white">房间大厅</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.push("/")}
+            className="w-8 h-8 rounded-full bg-ios-gray-500/50 flex items-center justify-center text-white/70"
+          >
+            <span className="text-lg">←</span>
+          </button>
+          <LanguageToggle />
+        </div>
+        <span className="text-[15px] font-semibold text-white">{t("roomLobby")}</span>
         <button
           onClick={handleShare}
           className="w-8 h-8 rounded-full bg-ios-blue/20 flex items-center justify-center text-ios-blue"
@@ -172,7 +178,7 @@ export default function RoomPage() {
         >
           <div className="bg-ios-gray-500/40 backdrop-blur-ios rounded-3xl p-5 border border-white/5 shadow-ios">
             <p className="text-[13px] text-white/40 text-center mb-1.5 uppercase tracking-wider">
-              房间号
+              {t("roomId")}
             </p>
             <div className="flex items-center justify-center gap-3">
               <span className="text-[36px] font-bold text-white tracking-[0.15em] font-mono">
@@ -226,7 +232,7 @@ export default function RoomPage() {
               <span className="text-[28px] font-bold text-white">
                 {players.length}/{maxPlayers}
               </span>
-              <span className="text-[11px] text-white/40">玩家</span>
+              <span className="text-[11px] text-white/40">{t("playersLabel")}</span>
             </div>
           </div>
 
@@ -236,7 +242,7 @@ export default function RoomPage() {
               color: isFull ? "#30D158" : "rgba(255,255,255,0.5)",
             }}
           >
-            {isFull ? "人齐了，即将开始..." : "等待玩家加入..."}
+            {isFull ? t("fullStarting") : t("waitingPlayers")}
           </motion.p>
 
           {!isFull && (
@@ -283,17 +289,17 @@ export default function RoomPage() {
                       </span>
                       {index === 0 && (
                         <span className="text-[11px] text-ios-yellow bg-ios-yellow/20 px-2 py-0.5 rounded-full shrink-0">
-                          房主
+                          {t("host")}
                         </span>
                       )}
                       {user && player.uid === user.uid && (
                         <span className="text-[11px] text-ios-blue bg-ios-blue/20 px-2 py-0.5 rounded-full shrink-0">
-                          我
+                          {t("me")}
                         </span>
                       )}
                     </div>
                     <span className="text-[12px] text-white/40">
-                      座位 #{player.seat + 1}
+                      {t("seat", player.seat + 1)}
                     </span>
                   </div>
                   <motion.div
@@ -316,7 +322,7 @@ export default function RoomPage() {
                     <UserPlus className="w-5 h-5 text-white/20" />
                   </div>
                   <span className="text-[15px] text-white/25">
-                    等待玩家...
+                    {t("waitingPlayer")}
                   </span>
                 </motion.div>
               ))}
@@ -356,8 +362,8 @@ export default function RoomPage() {
               ) : (
                 <span>
                   {canStart
-                    ? "提前开始游戏"
-                    : `至少需要 2 人`}
+                    ? t("startEarly")
+                    : t("needAtLeast2")}
                 </span>
               )}
             </motion.button>
@@ -370,7 +376,7 @@ export default function RoomPage() {
                 animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
-                房间已满，正在自动开始...
+                {t("autoStarting")}
               </motion.span>
             </div>
           )}
@@ -378,7 +384,7 @@ export default function RoomPage() {
           {!isHost && (
             <div className="bg-ios-gray-500/40 rounded-2xl p-4 text-center border border-white/5">
               <span className="text-[15px] text-white/50">
-                {isFull ? "即将开始游戏..." : "等待房主开始游戏..."}
+                {isFull ? t("startingSoon") : t("waitingHost")}
               </span>
             </div>
           )}
@@ -389,7 +395,7 @@ export default function RoomPage() {
             whileTap={{ scale: 0.98 }}
           >
             <LogOut className="w-4 h-4" />
-            <span>离开房间</span>
+            <span>{t("leaveRoom")}</span>
           </motion.button>
         </motion.div>
       </div>

@@ -4,11 +4,14 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocale } from "@/contexts/LocaleContext";
 import { ScoreBoard } from "@/components/home/ScoreBoard";
+import { LanguageToggle } from "@/components/ui/LanguageToggle";
 
 export default function HomePage() {
   const router = useRouter();
   const { user, userProfile, loading, signOut } = useAuth();
+  const { t } = useLocale();
   const [maxPlayers, setMaxPlayers] = useState<2 | 3 | 4>(4);
   const [roomIdInput, setRoomIdInput] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -42,7 +45,7 @@ export default function HomePage() {
       const data = result.data as { roomId: string };
       router.push(`/room/${data.roomId}`);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "创建房间失败";
+      const msg = error instanceof Error ? error.message : t("createRoomFailed");
       setErrorMsg(msg);
     } finally {
       setIsCreating(false);
@@ -61,9 +64,18 @@ export default function HomePage() {
 
   return (
     <div className="min-h-[100dvh] bg-black flex flex-col overflow-y-auto">
-      {/* Top bar with user button */}
+      {/* Top bar with language toggle + user button */}
       <div className="h-12 w-full flex items-center justify-between px-5 pt-2 relative z-20 shrink-0">
-        <div className="w-10" />
+        <div className="flex items-center gap-2">
+          <LanguageToggle />
+          <motion.button
+            className="h-9 px-3 rounded-full bg-ios-gray-500/40 text-[13px] font-medium text-white/60 flex items-center"
+            onClick={() => router.push("/rules")}
+            whileTap={{ scale: 0.95 }}
+          >
+            {t("rules")}
+          </motion.button>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-white/60 font-medium">510K</span>
         </div>
@@ -138,7 +150,7 @@ export default function HomePage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            经典扑克牌游戏
+            {t("appTagline")}
           </motion.p>
         </motion.div>
 
@@ -165,7 +177,7 @@ export default function HomePage() {
               }`}
               onClick={() => setActiveTab("create")}
             >
-              创建房间
+              {t("createRoom")}
             </button>
             <button
               className={`flex-1 py-2.5 text-[15px] font-semibold rounded-lg relative z-10 transition-colors duration-200 ${
@@ -173,7 +185,7 @@ export default function HomePage() {
               }`}
               onClick={() => setActiveTab("join")}
             >
-              加入房间
+              {t("joinRoom")}
             </button>
           </div>
         </motion.div>
@@ -198,7 +210,7 @@ export default function HomePage() {
                 {/* Player Count Card */}
                 <div className="bg-ios-gray-500/40 backdrop-blur-ios rounded-2xl p-5 border border-white/5 shadow-ios">
                   <h3 className="text-[15px] font-semibold text-white mb-4">
-                    选择玩家人数
+                    {t("selectPlayers")}
                   </h3>
                   <div className="flex gap-3">
                     {[2, 3, 4].map((num) => (
@@ -212,7 +224,7 @@ export default function HomePage() {
                         onClick={() => setMaxPlayers(num as 2 | 3 | 4)}
                         whileTap={{ scale: 0.96 }}
                       >
-                        <span>{num}人</span>
+                        <span>{t("players", num)}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -235,7 +247,7 @@ export default function HomePage() {
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     />
                   ) : (
-                    <span>创建房间</span>
+                    <span>{t("createRoomBtn")}</span>
                   )}
                 </motion.button>
 
@@ -255,12 +267,12 @@ export default function HomePage() {
                 {/* Room ID Input Card */}
                 <div className="bg-ios-gray-500/40 backdrop-blur-ios rounded-2xl p-5 border border-white/5 shadow-ios">
                   <h3 className="text-[15px] font-semibold text-white mb-4">
-                    输入房间号
+                    {t("inputRoomId")}
                   </h3>
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="输入6位房间号"
+                      placeholder={t("roomIdPlaceholder")}
                       value={roomIdInput}
                       onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
                       className="w-full h-16 bg-ios-gray-600/70 rounded-2xl text-white text-center text-[28px] font-bold tracking-[0.15em] placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-ios-blue/50 border border-white/5 transition-all"
@@ -268,7 +280,7 @@ export default function HomePage() {
                     />
                   </div>
                   <p className="text-[13px] text-white/40 text-center mt-3">
-                    请输入房间号
+                    {t("roomIdHint")}
                   </p>
                 </div>
 
@@ -286,7 +298,7 @@ export default function HomePage() {
                   disabled={!roomIdInput.trim()}
                   whileTap={roomIdInput.trim() ? { scale: 0.98 } : undefined}
                 >
-                  <span>加入游戏</span>
+                  <span>{t("joinGameBtn")}</span>
                 </motion.button>
               </motion.div>
             )}
@@ -301,7 +313,7 @@ export default function HomePage() {
           transition={{ delay: 0.5 }}
         >
           <p className="text-[13px] text-white/30">
-            此游戏致敬yp小姐 不过输了还是要大冒险
+            {t("footer")}
           </p>
         </motion.footer>
       </div>

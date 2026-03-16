@@ -5,6 +5,7 @@ import { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocale } from "@/contexts/LocaleContext";
 import { useGameActions } from "@/hooks/useGameActions";
 import { PlayerBadge } from "@/components/ui/PlayerBadge";
 import { TrickArea } from "@/components/game/TrickArea";
@@ -73,6 +74,7 @@ export default function GamePage() {
   const roomId = params.id as string;
   const router = useRouter();
   const { user, userProfile } = useAuth();
+  const { t } = useLocale();
 
   const [fbRoom, setFbRoom] = useState<FirebaseRoom | null>(null);
   const [loading, setLoading] = useState(true);
@@ -219,9 +221,9 @@ export default function GamePage() {
   if (!fbRoom || fbRoom.status !== "playing") {
     return (
       <div className="h-[100dvh] flex flex-col items-center justify-center bg-black gap-4">
-        <p className="text-white/50 text-[17px]">游戏未开始</p>
+        <p className="text-white/50 text-[17px]">{t("gameNotStarted")}</p>
         <button className="text-ios-blue text-[15px]" onClick={() => router.push("/")}>
-          返回首页
+          {t("backHome")}
         </button>
       </div>
     );
@@ -260,7 +262,7 @@ export default function GamePage() {
               index={i}
             />
             <span className="text-[11px] text-white/30 tabular-nums">
-              {player.cardCount}张
+              {t("cards", player.cardCount)}
             </span>
           </div>
         ))}
@@ -349,10 +351,10 @@ export default function GamePage() {
             >
               <div className="text-center mb-5">
                 <LogOut className="w-10 h-10 text-ios-red mx-auto mb-3" />
-                <h3 className="text-[18px] font-bold text-white">退出对局？</h3>
+                <h3 className="text-[18px] font-bold text-white">{t("exitGame")}</h3>
                 <p className="text-[14px] text-white/50 mt-2">
-                  你目前的得分是 <span className="text-white font-semibold">{myPlayer.score} 分</span>。
-                  退出后分数仍会结算到总榜单。
+                  {t("exitConfirm")} <span className="text-white font-semibold">{myPlayer.score} </span>
+                  {t("exitConfirmSuffix")}
                 </p>
               </div>
 
@@ -362,14 +364,14 @@ export default function GamePage() {
                   onClick={handleExitConfirm}
                   whileTap={{ scale: 0.97 }}
                 >
-                  确认退出
+                  {t("confirmExit")}
                 </motion.button>
                 <motion.button
                   className="w-full py-3.5 rounded-2xl bg-white/10 text-white font-medium text-[15px]"
                   onClick={() => setShowExitDialog(false)}
                   whileTap={{ scale: 0.97 }}
                 >
-                  继续游戏
+                  {t("continueGame")}
                 </motion.button>
               </div>
             </motion.div>
