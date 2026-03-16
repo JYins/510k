@@ -5,7 +5,34 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { db, functions } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import type { RoomState, Player } from "@510k/shared";
+
+interface Player {
+  uid: string;
+  seat: number;
+  displayName?: string;
+  score: number;
+}
+
+interface TrickState {
+  leaderSeat: number;
+  lastPlay?: { seat: number; cards: Array<{ id: string; rank: string; suit?: string }> } | null;
+  passes: number;
+  pile: Array<{ id: string; rank: string; suit?: string }>;
+}
+
+export interface RoomState {
+  roomId: string;
+  status: "lobby" | "playing" | "ended";
+  maxPlayers: number;
+  createdAt: number;
+  updatedAt: number;
+  players: Player[];
+  currentTurnSeat: number;
+  trick: TrickState;
+  deck: Array<{ id: string; rank: string; suit?: string }>;
+  hands: Record<string, Array<{ id: string; rank: string; suit?: string }>>;
+  discards: Array<{ id: string; rank: string; suit?: string }>;
+}
 
 interface UseRoomOptions {
   roomId: string;
