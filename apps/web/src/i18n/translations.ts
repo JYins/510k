@@ -9,7 +9,7 @@ export const translations = {
 
     // Home
     appName: "510K",
-    appTagline: "经典扑克牌游戏",
+    appTagline: "加人们谁懂啊;-)",
     createRoom: "创建房间",
     joinRoom: "加入房间",
     selectPlayers: "选择玩家人数",
