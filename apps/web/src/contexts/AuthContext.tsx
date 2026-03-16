@@ -12,6 +12,8 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   type User,
 } from "firebase/auth";
@@ -35,8 +37,11 @@ interface AuthContextValue {
   loading: boolean;
   signUp: (email: string, password: string, displayName: string, avatar: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
+
+const googleProvider = new GoogleAuthProvider();
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
@@ -44,6 +49,7 @@ const AuthContext = createContext<AuthContextValue>({
   loading: true,
   signUp: async () => {},
   signIn: async () => {},
+  signInWithGoogle: async () => {},
   signOut: async () => {},
 });
 
@@ -100,6 +106,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserProfile(profile);
   }, []);
 
+  const signInWithGoogleFn = useCallback(async () => {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const existing = await fetchProfile(cred.user.uid).catch(() => null);
+    if (!existing) {
+      const randomAvatars = ["😎", "🤠", "🧑‍💻", "🦊", "🐱", "🐼", "🦄", "🐸", "🤖", "👻"];
+      const profile: Omit<UserProfile, "uid"> = {
+        displayName: cred.user.displayName || "玩家",
+        avatar: randomAvatars[Math.floor(Math.random() * randomAvatars.length)],
+        email: cred.user.email || "",
+        totalScore: 0,
+        gamesPlayed: 0,
+        gamesWon: 0,
+        createdAt: Date.now(),
+      };
+      await setDoc(doc(db, "users", cred.user.uid), profile);
+      setUserProfile({ uid: cred.user.uid, ...profile });
+    } else {
+      setUserProfile(existing);
+    }
+  }, []);
+
   const signOutFn = useCallback(async () => {
     await firebaseSignOut(auth);
     setUser(null);
@@ -108,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, userProfile, loading, signUp, signIn, signOut: signOutFn }}
+      value={{ user, userProfile, loading, signUp, signIn, signInWithGoogle: signInWithGoogleFn, signOut: signOutFn }}
     >
       {children}
     </AuthContext.Provider>
