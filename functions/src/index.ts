@@ -432,7 +432,7 @@ export const playCards = onCall(async (request) => {
       if (!lastValue) {
         throw new HttpsError("failed-precondition", "上一手牌型异常。");
       }
-      if (!canBeatPlay(playValue, lastValue)) {
+      if (!canBeatPlay(playValue, lastValue, removed, room.trick.lastPlay.cards)) {
         throw new HttpsError("failed-precondition", "你的牌不能压过上一手。");
       }
     }
@@ -457,10 +457,10 @@ export const playCards = onCall(async (request) => {
       updatedAt: Date.now()
     };
 
-    const allEmpty = updatedRoom.players.every(
+    const anyHandEmpty = updatedRoom.players.some(
       (p) => (updatedRoom.hands[p.uid] ?? []).length === 0
     );
-    if (allEmpty) {
+    if (anyHandEmpty) {
       updatedRoom = settleGame(updatedRoom);
     }
 
@@ -517,7 +517,7 @@ export const passTurn = onCall(async (request) => {
       updatedAt: Date.now()
     };
 
-    if (nextPasses >= room.players.length - 1) {
+    if (nextPasses >= room.players.length) {
       const winnerSeat = room.trick.lastPlay.seat;
       const trickPoints = sumPoints(room.trick.pile);
       const updatedPlayers = room.players.map((p) =>
@@ -563,15 +563,11 @@ export const passTurn = onCall(async (request) => {
       };
     }
 
-    const allHandsEmpty = nextRoom.players.every(
+    const anyHandEmpty = nextRoom.players.some(
       (p) => (nextRoom.hands[p.uid] ?? []).length === 0
     );
-    const shouldEnd = allHandsEmpty || (
-      nextRoom.deck.length === 0 &&
-      nextRoom.trick.lastPlay === null &&
-      nextRoom.trick.pile.length === 0 &&
-      allHandsEmpty
-    );
+    const deckEmptyAndAllPassed = nextRoom.deck.length === 0 && nextPasses >= room.players.length;
+    const shouldEnd = anyHandEmpty || deckEmptyAndAllPassed;
     if (shouldEnd) {
       nextRoom = settleGame(nextRoom);
     }
@@ -612,7 +608,7 @@ export const endTrickIfNeeded = onCall(async (request) => {
       return { roomId, ended: false };
     }
 
-    if (room.trick.passes < room.players.length - 1) {
+    if (room.trick.passes < room.players.length) {
       return { roomId, ended: false };
     }
 

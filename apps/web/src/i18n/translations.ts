@@ -99,6 +99,8 @@ export const translations = {
     playTypeBomb: "炸弹",
     playTypePass: "过",
     selectCards: "选牌",
+    gameEnded: "整局结束，进入结算",
+    enterSettlement: "进入结算",
   },
   en: {
     // Common
@@ -198,6 +200,8 @@ export const translations = {
     playTypeBomb: "Bomb",
     playTypePass: "Pass",
     selectCards: "Select",
+    gameEnded: "Game Over — Enter Settlement",
+    enterSettlement: "View Results",
   },
 } as const;
 

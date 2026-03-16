@@ -67,6 +67,18 @@ function highestSuitValue(cards: Card[], targetRank?: Rank): number {
   return best;
 }
 
+function getSuitValueForCard(card: Card): number {
+  return card.suit ? SUIT_VALUE[card.suit] : 0;
+}
+
+/** For same-rank pairs: both of challenger's cards must beat both of current's (by suit). */
+export function pairBeatsBySuit(challenger: Card[], current: Card[]): boolean {
+  if (challenger.length !== 2 || current.length !== 2) return false;
+  const [c0, c1] = [...challenger].sort((a, b) => getSuitValueForCard(b) - getSuitValueForCard(a));
+  const [d0, d1] = [...current].sort((a, b) => getSuitValueForCard(b) - getSuitValueForCard(a));
+  return getSuitValueForCard(c0) > getSuitValueForCard(d0) && getSuitValueForCard(c1) > getSuitValueForCard(d1);
+}
+
 export function analyzePlay(cards: Card[]): PlayValue | null {
   if (cards.length === 0) {
     return null;
@@ -189,7 +201,9 @@ export function analyzePlay(cards: Card[]): PlayValue | null {
 
 export function canBeatPlay(
   challenger: PlayValue,
-  current: PlayValue
+  current: PlayValue,
+  challengerCards?: Card[],
+  currentCards?: Card[]
 ): boolean {
   if (challenger.isJokerBomb) {
     return true;
@@ -215,6 +229,9 @@ export function canBeatPlay(
   if (challenger.mainRankValue < current.mainRankValue) {
     return false;
   }
-  // Same rank: compare suit (♠>♥>♣>♦)
+  // Same rank: for pairs, both cards must beat by suit; otherwise compare mainSuitValue
+  if (challenger.type === "pair" && challengerCards && currentCards && challengerCards.length === 2 && currentCards.length === 2) {
+    return pairBeatsBySuit(challengerCards, currentCards);
+  }
   return challenger.mainSuitValue > current.mainSuitValue;
 }

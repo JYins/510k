@@ -79,6 +79,7 @@ export default function GamePage() {
   const [fbRoom, setFbRoom] = useState<FirebaseRoom | null>(null);
   const [loading, setLoading] = useState(true);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [showGameEndDialog, setShowGameEndDialog] = useState(false);
   const [showTrickEnd, setShowTrickEnd] = useState(false);
   const lastTrickTimestamp = useRef(0);
 
@@ -108,14 +109,12 @@ export default function GamePage() {
     return undefined;
   }, [fbRoom?.lastTrickResult]);
 
-  // Navigate to result when game ends
+  // Show game-end dialog when game ends
   useEffect(() => {
     if (fbRoom?.status === "ended") {
-      const timer = setTimeout(() => router.push(`/game/${roomId}/result`), 1500);
-      return () => clearTimeout(timer);
+      setShowGameEndDialog(true);
     }
-    return undefined;
-  }, [fbRoom?.status, roomId, router]);
+  }, [fbRoom?.status]);
 
   const myUid = user?.uid ?? "";
 
@@ -218,7 +217,7 @@ export default function GamePage() {
     );
   }
 
-  if (!fbRoom || fbRoom.status !== "playing") {
+  if (!fbRoom || (fbRoom.status !== "playing" && fbRoom.status !== "ended")) {
     return (
       <div className="h-[100dvh] flex flex-col items-center justify-center bg-black gap-4">
         <p className="text-white/50 text-[17px]">{t("gameNotStarted")}</p>
@@ -331,6 +330,39 @@ export default function GamePage() {
           isMyTurn={isMyTurn}
         />
       </div>
+
+      {/* Game end dialog */}
+      <AnimatePresence>
+        {showGameEndDialog && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-[#1c1c1e] rounded-3xl p-6 mx-6 max-w-sm w-full border border-white/10 shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <div className="text-center mb-5">
+                <h3 className="text-[18px] font-bold text-white">{t("gameEnded")}</h3>
+              </div>
+              <motion.button
+                className="w-full py-3.5 rounded-2xl bg-ios-blue text-white font-semibold text-[15px]"
+                onClick={() => {
+                  setShowGameEndDialog(false);
+                  router.push(`/game/${roomId}/result`);
+                }}
+                whileTap={{ scale: 0.97 }}
+              >
+                {t("enterSettlement")}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Exit confirmation dialog */}
       <AnimatePresence>

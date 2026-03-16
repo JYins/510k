@@ -40,7 +40,7 @@ export const rulesContent: Record<Locale, string> = {
 
 - 某位玩家先出一手牌
 - 其他玩家依次选择压牌或 Pass
-- 当无人能继续压时，本墩结束
+- 当所有人（包括先手再轮到自己时）都选择 Pass 后，本墩结束
 - 最大者赢得本墩并吃掉本墩分数
 
 ## 6. 允许的出牌方式
@@ -64,6 +64,7 @@ export const rulesContent: Record<Locale, string> = {
 ## 8. 压制规则
 
 - 牌型相同、结构相同、牌力更大才能压
+- 对子同点数时，可比较花色：两张牌的花色都大于对方时才能压
 - 炸弹可压普通牌型
 - 更大炸弹压更小炸弹
 - 王炸最大
@@ -72,9 +73,12 @@ export const rulesContent: Record<Locale, string> = {
 
 若本墩总分 = 0 且牌堆有牌，则从本墩赢家开始顺时针补牌，每人补到 5 张（牌堆不足则补到空为止）。
 
-## 10. 牌堆空后
+## 10. 牌堆空后与终局条件
 
-不再补牌，玩家只打手中剩余牌。若无法推进（全员 Pass 或先手无法出牌），系统自动结算。
+不再补牌，玩家只打手中剩余牌。满足以下任一条件时终局结算：
+
+- 牌库发空后，若所有人都 Pass，则终局结算
+- 任一玩家手牌打光时，立即终局结算
 
 ## 11. 终局结算
 
@@ -124,7 +128,7 @@ Each player gets 5 cards. Remaining cards form the deck. Hands change during pla
 
 - One player leads with a valid play
 - Others take turns: play higher or pass
-- When no one can beat, the trick ends
+- When everyone (including the leader when it comes back to them) has passed, the trick ends
 - Highest play wins the trick and takes all points in it
 
 ## 6. Valid Play Types
@@ -148,6 +152,7 @@ Each player gets 5 cards. Remaining cards form the deck. Hands change during pla
 ## 8. Beating Rules
 
 - Same type, same structure, higher rank (and suit if tied)
+- For same-rank pairs: both of your cards must beat both of opponent's by suit
 - Bombs beat non-bombs
 - Higher bomb beats lower bomb
 - Joker bomb beats everything
@@ -156,9 +161,12 @@ Each player gets 5 cards. Remaining cards form the deck. Hands change during pla
 
 If trick total = 0 and deck has cards, refill clockwise from winner until each has 5 cards (or deck is empty).
 
-## 10. Empty Deck
+## 10. Empty Deck and End Conditions
 
-No more refills. Players use remaining cards. If play cannot continue (all pass or leader cannot play), game auto-settles.
+No more refills. Players use remaining cards. Game ends when either:
+
+- Deck is empty and everyone has passed
+- Any player runs out of cards
 
 ## 11. End Game
 
