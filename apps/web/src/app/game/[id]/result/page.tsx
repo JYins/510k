@@ -10,7 +10,7 @@ export default function ResultPage() {
   const params = useParams();
   const roomId = params.id as string;
   const router = useRouter();
-  const [players, setPlayers] = useState<Array<{ uid: string; displayName?: string; score: number; seat: number }>>([]);
+  const [players, setPlayers] = useState<Array<{ uid: string; displayName?: string; score: number; seat: number; isBot?: boolean }>>([]);
 
   useEffect(() => {
     async function load() {

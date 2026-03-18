@@ -19,6 +19,12 @@ export async function startGame(roomId: string) {
   return result.data as { roomId: string };
 }
 
+export async function addBotToRoom(roomId: string) {
+  const callable = httpsCallable(functions, "addBotToRoom");
+  const result = await callable({ roomId });
+  return result.data as { roomId: string; seat: number; botCount: number };
+}
+
 export async function playCards(roomId: string, cardIds: string[]) {
   const callable = httpsCallable(functions, "playCards");
   const result = await callable({ roomId, cardIds });

@@ -25,7 +25,7 @@ interface FirebaseRoom {
   roomId: string;
   status: string;
   maxPlayers: number;
-  players: Array<{ uid: string; seat: number; displayName?: string; score: number }>;
+  players: Array<{ uid: string; seat: number; displayName?: string; score: number; isBot?: boolean }>;
   currentTurnSeat: number;
   trick: {
     leaderSeat: number;
@@ -58,13 +58,17 @@ function toCard(c: { id: string; rank: string; suit?: string }): Card {
   };
 }
 
-function toPlayer(p: { uid: string; seat: number; displayName?: string; score: number }, index: number): Player {
+function toPlayer(
+  p: { uid: string; seat: number; displayName?: string; score: number; isBot?: boolean },
+  index: number
+): Player {
   return {
     id: p.uid, uid: p.uid,
     name: p.displayName ?? `玩家${index + 1}`,
     seat: p.seat, score: p.score,
+    isBot: p.isBot,
     isHost: index === 0, isReady: true, cardCount: 0,
-    emoji: ["😎", "🤠", "🧑‍💻", "🦊", "🐱"][index % 5],
+    emoji: p.isBot ? "🤖" : ["😎", "🤠", "🧑‍💻", "🦊", "🐱"][index % 5],
     isOnline: true, joinedAt: 0,
   };
 }

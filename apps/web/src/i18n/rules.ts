@@ -1,181 +1,212 @@
 import type { Locale } from "./translations";
 
 export const rulesContent: Record<Locale, string> = {
-  zh: `# 510K 游戏规则（完整版）
+  zh: `# 510K 游戏规则
 
-## 1. 游戏基本信息
+当前页面以网站现有实现为准，重点帮助你快速确认牌型、压制方式、补牌逻辑和结算条件。
+
+## 快速总览
 
 - **人数**：2–4 人
-- **牌组**：一副标准 54 张扑克（52 张普通牌 + 小王 + 大王）
+- **牌组**：一副 54 张扑克牌（52 张普通牌 + 小王 + 大王）
 - **行动顺序**：顺时针
-- **先手**：第一墩由系统指定（持最小牌者），此后每墩由上一墩赢家先出
+- **首墩先手**：持最小牌者先出；之后每墩由上一墩赢家先出
+- **补牌逻辑**：牌堆未空时，每墩结束后从赢家开始顺时针补到 5 张
+- **终局条件**：只有在牌堆打空后，才会进入最终结算
 
-## 2. 牌的大小规则
+## 牌型与大小
 
-### 点数大小（从小到大）
+### 点数顺序
 
 4 < 5 < 6 < 7 < 8 < 9 < 10 < J < Q < K < A < 2 < 3 < 小王 < 大王
 
-### 花色大小（同点数时比较）
+### 花色顺序
 
 黑桃 ♠ > 红桃 ♥ > 梅花 ♣ > 方块 ♦
 
-花色只在同点数时使用；大小王没有花色。
-
-## 3. 分牌规则
+### 分牌
 
 | 牌 | 分值 |
-|---|------|
+|---|---|
 | 5 | 5 分 |
 | 10 | 10 分 |
 | K | 10 分 |
 
-其他牌不计分。
+其他牌不计分；大小王不看花色。
 
-## 4. 开局发牌
-
-每人发 5 张手牌，剩余牌形成牌堆。游戏过程中手牌数量会变化，满足条件时会补牌到 5 张。
-
-## 5. 一墩（Trick）流程
-
-- 某位玩家先出一手牌
-- 其他玩家依次选择压牌或 Pass
-- 当所有人（包括先手再轮到自己时）都选择 Pass 后，本墩结束
-- 最大者赢得本墩并吃掉本墩分数
-
-## 6. 允许的出牌方式
+## 支持的出牌方式
 
 - **单张**：任意 1 张
 - **对子**：两张同点数
 - **三张**：三张同点数
-- **三带一**：三张同点 + 任意单张
-- **三带二**：三张同点 + 一对
-- **顺子**：5 张及以上连续单牌（不含 2、3、王）
-- **连对**：2 对及以上连续对子（不含 2、3、王）
-- **飞机**：2 组及以上连续三张（不含 2、3、王）
+- **三带一**：三张同点数 + 任意单张
+- **三带二**：三张同点数 + 一对
+- **顺子**：连续单牌；当前实现里因为手牌上限为 5，实际只会出现 5 张顺子；2、3、大小王不能进入顺子
 - **炸弹**：四张同点数
-- **王炸**：小王 + 大王（最大）
+- **王炸**：小王 + 大王，为全场最大
 
-## 7. 出牌规则
+当前实现**不支持**连对、飞机等多组连续组合牌型。
 
-- **先手**：可出任意合法牌型，不能 Pass
-- **跟牌**：只能出牌压过当前最大牌，或 Pass
-- **回到先手**：当除先手外所有人都 Pass，轮回到先手时，先手可出任意牌型（不必跟上一手），或 Pass 结束本墩
+## 出牌与压制
 
-## 8. 压制规则
+### 出牌流程
 
-- 牌型相同、结构相同、牌力更大才能压
-- 对子同点数时，可比较花色：两张牌的花色都大于对方时才能压
-- 炸弹可压普通牌型
-- 更大炸弹压更小炸弹
+- 首位玩家必须先出一手合法牌，不能 Pass
+- 之后轮到其他玩家时，只能选择**压过当前最大牌**，或者 Pass
+- 当所有其他玩家都 Pass，轮到当前领先玩家时，该玩家可以：
+- 继续出一手新的合法牌型
+- 或者 Pass，直接收下这一墩
+
+### 压制规则
+
+- 只有**牌型一致、结构一致**时，才可以比较大小
+- 点数更大则更大
+- 如果点数相同，则按花色比较
+- 对于**同点数对子**，你的两张牌花色都必须分别大于对方的两张牌，才算压过
+- 炸弹可以压普通牌型
+- 炸弹之间比点数大小
 - 王炸最大
 
-## 9. 零分墩补牌
+## 对局流程
 
-若本墩总分 = 0 且牌堆有牌，则从本墩赢家开始顺时针补牌，每人补到 5 张（牌堆不足则补到空为止）。
+### 开局
 
-## 10. 牌堆空后与终局条件
+- 每位玩家先拿 5 张手牌
+- 剩余牌组成牌堆
 
-不再补牌，玩家只打手中剩余牌。终局结算**仅**在牌库发空后触发，满足以下任一条件时结算：
+### 一墩结束
 
-- 所有人都 Pass
-- 有一方手牌打光
+- 一墩内所有已出的牌会进入该墩牌池
+- 最后保持领先的玩家赢得本墩，并拿走本墩全部分数
 
-## 11. 终局结算
+### 补牌
 
-- 已吃到的分数保留
-- 剩余手牌中的分牌：比较每人手中最大一张牌，最大者获得所有剩余分牌总分
+- 只要牌堆还有牌，一墩结束后就会从赢家开始顺时针补牌
+- 每位玩家都尽量补回到 5 张
+- 如果牌堆不够，就补到发空为止
 
-## 12. 胜负
+## 终局与结算
+
+### 何时结算
+
+只有牌堆已经打空时，满足以下任一条件才会结算：
+
+- 有玩家手牌打光
+- 一整轮都选择 Pass，本墩自然结束
+
+### 如何结算
+
+- 之前已经赢到手的分数全部保留
+- 所有人剩余手牌中的分牌会集中比较
+- 比较每位玩家剩余手牌中的**最大单张**
+- 最大单张所属玩家获得所有剩余分牌总分
+
+### 胜负
 
 按总分排名，分数最高者获胜。`,
 
-  en: `# 510K Game Rules (Full)
+  en: `# 510K Rules
 
-## 1. Basics
+This page is aligned with the current website implementation, so it focuses on the exact play types, refill flow, and end-game settlement used in the app.
+
+## Quick View
 
 - **Players**: 2–4
-- **Deck**: Standard 54 cards (52 + Small Joker + Big Joker)
+- **Deck**: 54 cards (52 standard cards + Small Joker + Big Joker)
 - **Turn order**: Clockwise
-- **Lead**: First trick — player with smallest card; later tricks — previous winner leads
+- **First lead**: The player holding the smallest card leads the first trick; after that, the previous trick winner leads
+- **Refill flow**: While the deck still has cards, every finished trick refills hands back toward 5 cards starting from the winner
+- **End game**: Final settlement happens only after the deck is empty
 
-## 2. Card Ranking
+## Card Strength and Points
 
-### Rank (low to high)
+### Rank Order
 
 4 < 5 < 6 < 7 < 8 < 9 < 10 < J < Q < K < A < 2 < 3 < Small Joker < Big Joker
 
-### Suits (tie-breaker when ranks equal)
+### Suit Order
 
 ♠ Spades > ♥ Hearts > ♣ Clubs > ♦ Diamonds
 
-Suits only matter for same-rank comparison; jokers have no suit.
-
-## 3. Point Cards
+### Point Cards
 
 | Card | Points |
-|------|--------|
+|---|---|
 | 5 | 5 |
 | 10 | 10 |
 | K | 10 |
 
-All other cards: 0 points.
+All other cards are worth 0 points, and jokers do not use suits.
 
-## 4. Dealing
-
-Each player gets 5 cards. Remaining cards form the deck. Hands change during play; refills to 5 when conditions are met.
-
-## 5. Trick Flow
-
-- One player leads with a valid play
-- Others take turns: play higher or pass
-- When everyone (including the leader when it comes back to them) has passed, the trick ends
-- Highest play wins the trick and takes all points in it
-
-## 6. Valid Play Types
+## Supported Play Types
 
 - **Single**: Any 1 card
-- **Pair**: Two cards of same rank
-- **Triple**: Three cards of same rank
-- **Triple+Single**: Triple + any single
-- **Triple+Pair**: Triple + pair
-- **Straight**: 5+ consecutive singles (no 2, 3, jokers)
-- **Consecutive pairs**: 2+ consecutive pairs (no 2, 3, jokers)
-- **Plane**: 2+ consecutive triples (no 2, 3, jokers)
-- **Bomb**: Four of a kind
-- **Joker Bomb**: Small + Big Joker (highest)
+- **Pair**: Two cards of the same rank
+- **Triple**: Three cards of the same rank
+- **Triple + Single**: Three of a kind plus any single card
+- **Triple + Pair**: Three of a kind plus one pair
+- **Straight**: Consecutive singles; because the current implementation keeps hand size at 5, this is effectively a 5-card straight; 2, 3, and jokers cannot be used
+- **Bomb**: Four cards of the same rank
+- **Joker Bomb**: Small Joker + Big Joker, the highest play in the game
 
-## 7. Play Rules
+The current implementation does **not** support consecutive pairs, planes, or other multi-group sequence patterns.
 
-- **Lead**: May play any valid type; cannot pass
-- **Follow**: Must play higher than current best, or pass
-- **Back to leader**: When everyone except the leader has passed and it's the leader's turn again, the leader may play any valid type (no need to follow the previous play) or pass to end the trick
+## Playing and Beating
 
-## 8. Beating Rules
+### Turn Flow
 
-- Same type, same structure, higher rank (and suit if tied)
-- For same-rank pairs: both of your cards must beat both of opponent's by suit
+- The leader must open with a valid play and cannot pass
+- Other players may either beat the current best play or pass
+- When play returns to the current leader after everyone else has passed, that leader may:
+- start a new valid play
+- or pass to take the trick immediately
+
+### Beating Rules
+
+- You can compare plays only when the **type and structure match**
+- Higher rank wins
+- If ranks are tied, suit order breaks the tie
+- For **same-rank pairs**, both of your suits must beat both of your opponent's suits
 - Bombs beat non-bombs
-- Higher bomb beats lower bomb
+- Higher bombs beat lower bombs
 - Joker bomb beats everything
 
-## 9. Zero-Point Trick Refill
+## Match Flow
 
-If trick total = 0 and deck has cards, refill clockwise from winner until each has 5 cards (or deck is empty).
+### Dealing
 
-## 10. Empty Deck and End Conditions
+- Each player starts with 5 cards
+- The remaining cards form the deck
 
-No more refills. Players use remaining cards. End-game settlement triggers **only** after the deck is empty, when either:
+### Finishing a Trick
 
-- Everyone has passed
-- One player runs out of cards
+- All cards played in that trick go into the trick pile
+- The player who remains ahead at the end of the trick wins all points in that pile
 
-## 11. End Game
+### Refills
 
-- Points already won are kept
-- Remaining point cards in hand: compare each player’s highest card; highest takes all remaining points
+- As long as the deck still has cards, every finished trick triggers a refill
+- Refill starts with the trick winner and continues clockwise
+- Each player refills toward 5 cards
+- If the deck runs out, refilling stops immediately
 
-## 12. Winner
+## End Game and Settlement
 
-Highest total score wins.`,
+### When Settlement Starts
+
+Final settlement only starts after the deck is empty, and then one of these happens:
+
+- A player runs out of cards
+- The trick ends after a full cycle of passes
+
+### How Settlement Works
+
+- Points already won stay with their owners
+- Any remaining point cards still in players' hands are collected into one final pool
+- Compare each player's **highest remaining single card**
+- The player with the highest remaining card takes all remaining point cards
+
+### Winner
+
+The highest total score wins.`,
 };

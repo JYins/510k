@@ -11,6 +11,11 @@ interface Player {
   seat: number;
   displayName?: string;
   score: number;
+  isBot?: boolean;
+}
+
+interface BotState {
+  lastProcessedTurnKey?: string | null;
 }
 
 interface TrickState {
@@ -32,6 +37,7 @@ export interface RoomState {
   deck: Array<{ id: string; rank: string; suit?: string }>;
   hands: Record<string, Array<{ id: string; rank: string; suit?: string }>>;
   discards: Array<{ id: string; rank: string; suit?: string }>;
+  botState?: BotState;
 }
 
 interface UseRoomOptions {
@@ -45,6 +51,7 @@ interface UseRoomReturn {
   createRoom: (maxPlayers: number) => Promise<{ roomId: string }>;
   joinRoom: () => Promise<{ roomId: string; seat: number }>;
   startGame: () => Promise<void>;
+  addBot: () => Promise<{ roomId: string; seat: number; botCount: number }>;
   leaveRoom: () => Promise<void>;
 }
 
@@ -99,9 +106,15 @@ export function useRoom({ roomId }: UseRoomOptions): UseRoomReturn {
     await fn({ roomId });
   }, [roomId]);
 
+  const addBot = useCallback(async () => {
+    const fn = httpsCallable(functions, "addBotToRoom");
+    const result = await fn({ roomId });
+    return result.data as { roomId: string; seat: number; botCount: number };
+  }, [roomId]);
+
   const leaveRoom = useCallback(async () => {
     // No leave function exists yet; just navigate away
   }, []);
 
-  return { room, isLoading, error, createRoom, joinRoom, startGame, leaveRoom };
+  return { room, isLoading, error, createRoom, joinRoom, startGame, addBot, leaveRoom };
 }

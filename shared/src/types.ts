@@ -29,6 +29,11 @@ export interface Player {
   seat: number;
   displayName?: string;
   score: number;
+  isBot?: boolean;
+}
+
+export interface BotState {
+  lastProcessedTurnKey?: string | null;
 }
 
 export interface TrickPlay {
@@ -68,4 +73,5 @@ export interface RoomState {
   hands: Record<string, Card[]>;
   discards: Card[];
   lastTrickResult?: TrickResult;
+  botState?: BotState;
 }

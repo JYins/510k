@@ -57,9 +57,16 @@ export function PlayerBadge({
       </div>
 
       {/* Name */}
-      <span className="text-[12px] font-medium tracking-tight text-white/70 leading-none mt-1">
-        {player.name}
-      </span>
+      <div className="mt-1 flex items-center gap-1">
+        <span className="text-[12px] font-medium tracking-tight text-white/70 leading-none">
+          {player.name}
+        </span>
+        {player.isBot && (
+          <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-white/45">
+            BOT
+          </span>
+        )}
+      </div>
 
       {/* Score */}
       <span className="text-[13px] font-semibold text-white leading-none">

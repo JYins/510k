@@ -50,6 +50,7 @@ export interface Player {
   name: string;
   seat: number;
   score: number;
+  isBot?: boolean;
   isHost: boolean;
   isReady: boolean;
   cardCount: number;
@@ -95,6 +96,9 @@ export interface Room {
   finishedAt: number | null;
   // Current leader for auto-reconnection
   hostId: string;
+  botState?: {
+    lastProcessedTurnKey?: string | null;
+  };
 }
 
 /** UI-specific game state (local) */

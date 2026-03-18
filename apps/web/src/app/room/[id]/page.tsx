@@ -25,10 +25,11 @@ export default function RoomPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLocale();
-  const { room, isLoading, joinRoom, startGame } = useRoom({ roomId });
+  const { room, isLoading, joinRoom, startGame, addBot } = useRoom({ roomId });
 
   const [copied, setCopied] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [isAddingBot, setIsAddingBot] = useState(false);
   const [joinError, setJoinError] = useState("");
   const hasJoined = useRef(false);
   const hasAutoStarted = useRef(false);
@@ -108,6 +109,19 @@ export default function RoomPage() {
       console.error("Failed to start game:", error);
     } finally {
       setIsStarting(false);
+    }
+  };
+
+  const handleAddBot = async () => {
+    setJoinError("");
+    setIsAddingBot(true);
+    try {
+      await addBot();
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : t("operationFailed");
+      setJoinError(msg);
+    } finally {
+      setIsAddingBot(false);
     }
   };
 
@@ -297,6 +311,11 @@ export default function RoomPage() {
                           {t("me")}
                         </span>
                       )}
+                      {player.isBot && (
+                        <span className="text-[11px] text-white/55 bg-white/10 px-2 py-0.5 rounded-full shrink-0">
+                          {t("bot")}
+                        </span>
+                      )}
                     </div>
                     <span className="text-[12px] text-white/40">
                       {t("seat", player.seat + 1)}
@@ -342,6 +361,25 @@ export default function RoomPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
+          {isHost && !isFull && (
+            <motion.button
+              className="w-full py-3.5 rounded-2xl bg-ios-gray-500/45 text-white/80 font-semibold text-[16px] flex items-center justify-center gap-2 border border-white/5 active:scale-[0.98] transition-all"
+              onClick={handleAddBot}
+              disabled={isAddingBot}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isAddingBot ? (
+                <motion.div
+                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+              ) : (
+                <span>{t("addBot")}</span>
+              )}
+            </motion.button>
+          )}
+
           {isHost && !isFull && (
             <motion.button
               className={`w-full py-4 rounded-2xl font-semibold text-[17px] flex items-center justify-center gap-2 transition-all ${
