@@ -163,8 +163,11 @@ function settleGame(room: RoomState): RoomState {
     maxHandCardByUid[player.uid] = maxCard(hand);
   }
 
-  let winnerUid = room.players[0]?.uid;
-  for (const player of room.players) {
+  const eligiblePlayers = room.players.filter((player) => !player.isBot);
+  const rankingPool = eligiblePlayers.length > 0 ? eligiblePlayers : room.players;
+
+  let winnerUid = rankingPool[0]?.uid;
+  for (const player of rankingPool) {
     const candidate = maxHandCardByUid[player.uid];
     const current = winnerUid ? maxHandCardByUid[winnerUid] : undefined;
     if (!current) {
@@ -754,48 +757,59 @@ export const addBotToRoom = onCall(async (request) => {
 
   const roomRef = db.collection(ROOMS_COLLECTION).doc(roomId);
 
-  return db.runTransaction(async (tx) => {
-    const snap = await tx.get(roomRef);
-    if (!snap.exists) {
-      throw new HttpsError("not-found", "房间不存在。");
-    }
+  try {
+    return await db.runTransaction(async (tx) => {
+      const snap = await tx.get(roomRef);
+      if (!snap.exists) {
+        throw new HttpsError("not-found", "房间不存在。");
+      }
 
-    const room = snap.data() as RoomState;
-    if (room.status !== "lobby") {
-      throw new HttpsError("failed-precondition", "只有等待中的房间才能添加 Bot。");
-    }
+      const room = snap.data() as RoomState;
+      if (!room.status || !Array.isArray(room.players)) {
+        throw new HttpsError("failed-precondition", "房间数据异常，无法添加 Bot。");
+      }
+      if (room.status !== "lobby") {
+        throw new HttpsError("failed-precondition", "只有等待中的房间才能添加 Bot。");
+      }
 
-    const host = room.players.find((player) => player.seat === 0);
-    if (host?.uid !== uid) {
-      throw new HttpsError("permission-denied", "只有房主可以添加 Bot。");
-    }
+      const host = room.players.find((player) => player.seat === 0);
+      if (host?.uid !== uid) {
+        throw new HttpsError("permission-denied", "只有房主可以添加 Bot。");
+      }
 
-    if (room.players.length >= room.maxPlayers) {
-      throw new HttpsError("failed-precondition", "房间已满。");
-    }
+      if (room.players.length >= room.maxPlayers) {
+        throw new HttpsError("failed-precondition", "房间已满。");
+      }
 
-    const seat = pickNextSeat(room.players, room.maxPlayers);
-    const botNumber = room.players.filter((player) => player.isBot).length + 1;
-    const botPlayer: Player = {
-      uid: `bot:${roomId}:${seat}`,
-      seat,
-      score: 0,
-      displayName: `Bot ${botNumber}`,
-      isBot: true,
-    };
-    const updatedPlayers = [...room.players, botPlayer];
+      const seat = pickNextSeat(room.players, room.maxPlayers);
+      const botNumber = room.players.filter((player) => player.isBot).length + 1;
+      const botPlayer: Player = {
+        uid: `bot-${roomId}-${seat}`,
+        seat,
+        score: 0,
+        displayName: `Bot ${botNumber}`,
+        isBot: true,
+      };
+      const updatedPlayers = [...room.players, botPlayer];
 
-    tx.update(roomRef, {
-      players: updatedPlayers,
-      updatedAt: Date.now(),
+      tx.update(roomRef, {
+        players: updatedPlayers,
+        updatedAt: Date.now(),
+      });
+
+      return {
+        roomId,
+        seat,
+        botCount: updatedPlayers.filter((player) => player.isBot).length,
+      };
     });
-
-    return {
-      roomId,
-      seat,
-      botCount: updatedPlayers.filter((player) => player.isBot).length,
-    };
-  });
+  } catch (error) {
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+    console.error(`addBotToRoom failed for room ${roomId}:`, error);
+    throw new HttpsError("internal", "添加 Bot 失败，请稍后重试。");
+  }
 });
 
 export const startGame = onCall(async (request) => {
